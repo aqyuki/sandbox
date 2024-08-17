@@ -26,7 +26,7 @@ func main() {
 		for {
 			select {
 			case msg := <-ch:
-				fmt.Println(msg)
+				fmt.Printf("[server] %s\n", msg)
 			case <-ctx.Done():
 				return
 			}
