@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "pkg/proto";
+package proto.v1;
 
-package service;
+option go_package = "pkg/proto";
 
 service GreetingService {
   rpc Hello(HelloRequest) returns (HelloResponse);
