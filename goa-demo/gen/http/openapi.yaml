@@ -1,0 +1,62 @@
+swagger: "2.0"
+info:
+    title: ToDo Service
+    description: Service for managing ToDo lists
+    version: 0.0.1
+host: localhost:8000
+consumes:
+    - application/json
+    - application/xml
+    - application/gob
+produces:
+    - application/json
+    - application/xml
+    - application/gob
+paths:
+    /openapi.json:
+        get:
+            tags:
+                - todo
+            summary: Download ./gen/http/openapi.json
+            operationId: todo#/openapi.json
+            responses:
+                "200":
+                    description: File downloaded
+                    schema:
+                        type: file
+            schemes:
+                - http
+    /task/create:
+        post:
+            tags:
+                - todo
+            summary: create todo
+            operationId: todo#create
+            parameters:
+                - name: CreateRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/TodoCreatePayload'
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        type: integer
+                        format: int64
+            schemes:
+                - http
+definitions:
+    TodoCreatePayload:
+        title: TodoCreatePayload
+        type: object
+        properties:
+            desc:
+                type: string
+                example: Consequuntur sunt.
+            title:
+                type: string
+                example: Iusto repudiandae facilis aut.
+        example:
+            desc: Doloremque fugiat numquam distinctio quia quasi facere.
+            title: Exercitationem rerum blanditiis iure voluptas saepe officiis.
