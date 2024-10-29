@@ -1,0 +1,7 @@
+version: "3"
+
+tasks:
+  build:
+    cmds:
+      - cp -r  ./frontend/dist/* ./dist/
+      - go build -o ./bin/app main.go
