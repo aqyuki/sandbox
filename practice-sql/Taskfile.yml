@@ -1,0 +1,7 @@
+version: '3'
+
+tasks:
+  default:
+    silent: true
+    cmds:
+      - dblab --db 'database' --driver 'postgres' --host 'localhost' --port '5432' --user 'postgres' --pass 'postgres' --ssl disable
