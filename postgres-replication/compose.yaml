@@ -1,0 +1,80 @@
+x-postgres-env: &postgres-env
+  POSTGRES_USER: admin
+  POSTGRES_PASSWORD: password
+  POSTGRES_DB: demo
+
+x-postgres-healthcheck: &postgres-healthcheck
+  test: "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} || exit 1"
+  interval: 10s
+  timeout: 10s
+  retries: 5
+  start_period: 5s
+
+services:
+  postgres-primary:
+    image: postgres:18.3
+    container_name: postgres-primary
+    environment:
+      <<: *postgres-env
+    command: |
+      postgres
+      -c wal_level=replica
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby=on
+      -c wal_keep_size=128MB
+    healthcheck:
+      <<: *postgres-healthcheck
+    ports:
+      - 5432:5432
+    volumes:
+      - ./docker/primary/init:/docker-entrypoint-initdb.d
+      - primary-data:/var/lib/postgresql
+    networks:
+      - postgres-network
+
+  postgres-replica-1: &postgres-replica
+    build:
+      context: ./docker/replica
+    container_name: postgres-replica-1
+    environment:
+      <<: *postgres-env
+    healthcheck:
+      <<: *postgres-healthcheck
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    volumes:
+      - replica-1-data:/var/lib/postgresql
+    networks:
+      - postgres-network
+
+  postgres-replica-2:
+    <<: *postgres-replica
+    container_name: postgres-replica-2
+    volumes:
+      - replica-2-data:/var/lib/postgresql
+
+  haproxy:
+    image: haproxy:lts
+    container_name: pg_haproxy
+    volumes:
+      - "./docker/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro"
+    ports:
+      - "5433:5433"
+      - "8404:8404" # 稼働状況を確認できるダッシュボード
+    networks:
+      - postgres-network
+    depends_on:
+      postgres-replica-1:
+        condition: service_healthy
+      postgres-replica-2:
+        condition: service_healthy
+
+volumes:
+  primary-data:
+  replica-1-data:
+  replica-2-data:
+
+networks:
+  postgres-network:
